@@ -1,0 +1,15 @@
+{
+  "name": "@acai/config",
+  "version": "0.1.0",
+  "description": "Config is a base module that helps you organize data through your application",
+  "repository": "https://github.com/AcaiFramework/config.git",
+  "author": "Rafael <rafael.chaves98@hotmail.com>",
+  "license": "BSD-3-Clause",
+  "private": false,
+  "scripts": {
+	  "test": "deno run --config ./tsconfig.json --import-map=package.json -A --unstable ./src/modules/Model.ts"
+  },
+  "imports": {
+	  "query/": "https://deno.land/x/acai_query@0.3.0/"
+  }
+}
