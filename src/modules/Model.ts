@@ -24,7 +24,7 @@ export default abstract class Model {
 	// -------------------------------------------------
 
 	public constructor (fields: Record<string, unknown> = {}) {
-		const $allFields = (this.constructor as {$fields?: FieldInfoInterface[]}).$fields;
+		const $allFields = (this.constructor as unknown as {$fields: FieldInfoInterface[]}).$fields;
 
 		// set fields
 		for (let i = 0; i < $allFields.length; i++) {
@@ -69,4 +69,8 @@ export default abstract class Model {
 	public static query () {
 		return query().table(this.$table);
 	}
+}
+
+class User extends Model {
+	public id: string;
 }
