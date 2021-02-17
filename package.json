@@ -1,6 +1,6 @@
 {
   "name": "@acai/model",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "Models are a easy way to group your data with methods to format it, save and other crud operations.",
   "repository": "https://github.com/AcaiFramework/config.git",
   "author": "Rafael <rafael.chaves98@hotmail.com>",
@@ -14,11 +14,11 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@acai/query": "^0.3.7",
+    "@acai/query": "*",
     "luxon": "^1.26.0"
   },
   "peerDependencies": {
-    "@acai/query": "^0.3.7",
+    "@acai/query": "*",
     "luxon": "^1.26.0"
   },
   "devDependencies": {
