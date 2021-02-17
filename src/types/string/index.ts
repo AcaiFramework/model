@@ -1,11 +1,13 @@
 // Interfaces
-import ModelTypeInterface from "../../interfaces/modelType.ts";
+import ModelTypeInterface from "../../interfaces/modelType";
 
-const toString = (v: unknown, _: unknown, [max]: [string?]) => {
+const toString = (v: unknown, _: unknown, args?: {max?: number}) => {
 	const format = `${v}`;
 
-	if (max && parseInt(max) < format.length)
-		return format.substring(0, parseInt(max));
+	if (args) {
+		if (args.max && args.max < format.length)
+			return format.substring(0, args.max);
+	}
 		
 	return format;
 };

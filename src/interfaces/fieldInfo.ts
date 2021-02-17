@@ -1,5 +1,5 @@
 export default interface FieldInfoInterface {
 	name: string;
 	type: string;
-	args: string[];
+	args: Record<string, string | number | boolean | string[]>;
 }

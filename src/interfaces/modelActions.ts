@@ -1,13 +1,7 @@
 type modelActions = (
-	// properties
-	"type" |
-
 	// callbacks
-
 	"onCreate" |
 	"onSave" |
-	"onUpdate" |
-	"onDelete" |
 	"onRetrieve" |
 	"onSerialize"
 );

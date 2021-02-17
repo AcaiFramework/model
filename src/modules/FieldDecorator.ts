@@ -1,9 +1,7 @@
 // Interfaces
-import FieldInfoInterface from "../interfaces/fieldInfo.ts";
+import FieldInfoInterface from "../interfaces/fieldInfo";
 
-const Field = (type = "string"): PropertyDecorator => {
-	const args 	= (type.split(":")[1] || "").split(",");
-
+const Field = (type = "string", args?: Record<string, string | number | boolean | string[]>): PropertyDecorator => {
 	return (target, key) => {
 		const model = target.constructor as {$fields?: FieldInfoInterface[]};
 
