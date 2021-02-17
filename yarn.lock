@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@acai/query@^0.3.7":
+"@acai/query@*":
   version "0.3.7"
   resolved "https://registry.yarnpkg.com/@acai/query/-/query-0.3.7.tgz#edc4ff0cee37ceaacc50f053751638b69530f8d6"
   integrity sha512-B8bPldNonfzywBAsY/9L9W804vW3suoA0rWiVhLNkZgC+S7usNsKqIli7h4Cc9CETwd2+pngjLWyZ19UXDdKSQ==

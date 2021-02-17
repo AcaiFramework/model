@@ -26,7 +26,7 @@ export default class Model {
 	// -------------------------------------------------
 
 	public constructor (fields: Record<string, unknown> = {}, databaseSaved = false) {
-		const $allFields 			= (this.constructor.prototype as unknown as {$fields: FieldInfoInterface[]}).$fields;
+		const $allFields 			= (this.constructor as unknown as {$fields: FieldInfoInterface[]}).$fields;
 		this.$databaseInitialized 	= databaseSaved;
 
 		// set fields
