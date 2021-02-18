@@ -3,9 +3,9 @@
 
 
 "@acai/query@*":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@acai/query/-/query-0.3.7.tgz#edc4ff0cee37ceaacc50f053751638b69530f8d6"
-  integrity sha512-B8bPldNonfzywBAsY/9L9W804vW3suoA0rWiVhLNkZgC+S7usNsKqIli7h4Cc9CETwd2+pngjLWyZ19UXDdKSQ==
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@acai/query/-/query-0.3.8.tgz#e85cec12dc4bffd95ce700c489b99b704cc6b86a"
+  integrity sha512-B1QqpAcPnvk1zQv2oMeUXJHeJYK520nJ7DuHersP8NUZZ+ZDbqKL0cPF4KpajXMr9EOKC+eIW71C/MHC475JtA==
   optionalDependencies:
     mysql "^2.18.1"
     pg "^8.5.1"
@@ -16,6 +16,13 @@
   integrity sha512-g04O2BpsGEjFQ4QLaxhwAIZajKzCN+48Qd4LqnNNSuSXVh6NFHYQrBvuAdSVvp7rad9Aq3BjceRLckQL+G2mwg==
   dependencies:
     glob "^7.1.6"
+
+"@acai/utils@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@acai/utils/-/utils-0.1.1.tgz#dfa17e4db266fe42ef9227805fa9b58dad2e5644"
+  integrity sha512-Z9YOD9R1a+ohj/SFFlS3C3bEWrH78zpO618lp5Zb3qCTyzr0kl7ghPU3W1eTF9I3gYcUHzFGvKd0XBqS8KaiNw==
+  dependencies:
+    ts-node "^9.1.1"
 
 "@types/luxon@^1.26.0":
   version "1.26.0"

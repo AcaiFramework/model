@@ -1,5 +1,6 @@
 // Packages
 import query from "@acai/query";
+import { CustomException } from "@acai/utils";
 
 // Interfaces
 import FieldInfoInterface from "../interfaces/fieldInfo";
@@ -92,16 +93,30 @@ export default class Model {
 		return this.query().paginate<I>(page, perPage);
 	}
 
+	public static async find <T extends typeof Model, I = InstanceType<T>> (this: T, id: string | number): Promise<I> {
+		return (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get())[0] as unknown as I | undefined;
+	}
+
+	public static async findOrFail <T extends typeof Model, I = InstanceType<T>> (this: T, id: string | number): Promise<I> {
+		const response = (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get())[0] as unknown as I | undefined;
+
+		if (!response) {
+			throw new CustomException("modelNotFound", `Model ${this.name} with ${this.$primary} ${id} not found`, {
+				model		: this.name,
+				primaryKey	: this.$primary,
+				id			: id,
+			});
+		}
+
+		return response as I;
+	}
+
 	public static async first <T extends typeof Model, I = InstanceType<T>> (this: T) {
-		return this.query().first() as Promise<I>;
+		return this.query().first() as Promise<I | undefined>;
 	}
 
 	public static async last <T extends typeof Model, I = InstanceType<T>> (this: T) {
-		return this.query().last() as Promise<I>;
-	}
-
-	public static async find <T extends typeof Model, I = InstanceType<T>> (this: T, id: string | number): Promise<I> {
-		return (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get())[0] as unknown as I;
+		return this.query().last() as Promise<I | undefined>;
 	}
 
 	public static async runMigration () {
