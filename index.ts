@@ -11,3 +11,6 @@ export {default as Table} 	from "./src/modules/ModelDecorator";
 
 // typings
 export { default as typeManager } from "./src/types";
+
+// extra
+export { getModels } from "./src/modules/ModelDecorator";

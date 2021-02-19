@@ -7,6 +7,7 @@ import intType 		from "./int";
 import dateType 	from "./date";
 import booleanType 	from "./boolean";
 import floatType 	from "./float";
+import hashType 	from "./hash";
 
 let typesList: Record<string, ModelTypeInterface> = {
 	"string"	: stringType,
@@ -14,6 +15,7 @@ let typesList: Record<string, ModelTypeInterface> = {
 	"float"		: floatType,
 	"date"		: dateType,
 	"boolean"	: booleanType,
+	"hash"		: hashType,
 };
 
 // -------------------------------------------------

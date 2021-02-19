@@ -1,8 +1,11 @@
-const models = [];
+// Modules
+import Model from "./Model";
 
-const Model = (table: string, primary = "id"): ClassDecorator => {
+const models = [] as typeof Model[];
+
+const ModelDecorator = (table: string, primary = "id"): ClassDecorator => {
 	return (target) => {
-		const model 	= target as unknown as {$table: string, $primary: string};
+		const model 	= target as unknown as typeof Model;
 		model.$table 	= table;
 		model.$primary	= primary;
 
@@ -10,6 +13,6 @@ const Model = (table: string, primary = "id"): ClassDecorator => {
 	};
 }
 
-export default Model;
+export default ModelDecorator;
 
 export const getModels = () => models;

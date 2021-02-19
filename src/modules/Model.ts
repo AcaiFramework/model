@@ -14,8 +14,8 @@ export default class Model {
 	// -------------------------------------------------
 
 	// static
-	protected static $table		: string;
-	protected static $primary	: string = "id";
+	public static $table		: string;
+	public static $primary	: string = "id";
 	protected static $fields	: FieldInfoInterface[] = [];
 
 	// instance
@@ -93,11 +93,11 @@ export default class Model {
 		return this.query().paginate<I>(page, perPage);
 	}
 
-	public static async find <T extends typeof Model, I = InstanceType<T>> (this: T, id: string | number): Promise<I> {
+	public static async find <T extends typeof Model, I = InstanceType<T>> (this: T, id: string | number): Promise<I | undefined> {
 		return (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get())[0] as unknown as I | undefined;
 	}
 
-	public static async findOrFail <T extends typeof Model, I = InstanceType<T>> (this: T, id: string | number): Promise<I> {
+	public static async findOrFail <T extends typeof Model, I = InstanceType<T>> (this: T, id: string | number): Promise<I | undefined> {
 		const response = (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get())[0] as unknown as I | undefined;
 
 		if (!response) {
@@ -111,11 +111,11 @@ export default class Model {
 		return response as I;
 	}
 
-	public static async first <T extends typeof Model, I = InstanceType<T>> (this: T) {
+	public static async first <T extends typeof Model, I = InstanceType<T>> (this: T): Promise<I | undefined> {
 		return this.query().first() as Promise<I | undefined>;
 	}
 
-	public static async last <T extends typeof Model, I = InstanceType<T>> (this: T) {
+	public static async last <T extends typeof Model, I = InstanceType<T>> (this: T): Promise<I | undefined> {
 		return this.query().last() as Promise<I | undefined>;
 	}
 
