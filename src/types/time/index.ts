@@ -26,12 +26,12 @@ const toSerializeDate = (v: Date, _: unknown, args?: {format?: string}) => {
 		}
 	}
 		
-	return value.toISO();
+	return value.toISOTime();
 };
 
 const datetimeType = {
 	type: {
-		type: "datetime",
+		type: "time",
 	},
 	onCreate	: toDate,
 	onRetrieve	: toDate,
