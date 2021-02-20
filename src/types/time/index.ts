@@ -29,7 +29,7 @@ const toSerializeDate = (v: Date, _: unknown, args?: {format?: string}) => {
 	return value.toISOTime();
 };
 
-const datetimeType = {
+const timeType = {
 	type: {
 		type: "time",
 	},
@@ -39,4 +39,4 @@ const datetimeType = {
 	onSerialize	: toSerializeDate,
 } as ModelTypeInterface;
 
-export default datetimeType;
+export default timeType;
