@@ -12,11 +12,14 @@ const toString = (v: unknown, _: unknown, args?: {max?: number}) => {
 	return format;
 };
 
-const stringType = {
+const textType = {
+	type: {
+		type: "text",
+	},
 	onCreate	: toString,
 	onUpdate	: toString,
 	onSave		: toString,
 	onRetrieve	: toString,
 } as ModelTypeInterface;
 
-export default stringType;
+export default textType;

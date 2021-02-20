@@ -10,6 +10,9 @@ const toDatabaseBoolean = (v: unknown) => {
 }
 
 const booleanType = {
+	type: {
+		type: "int",
+	},
 	onSave		: toDatabaseBoolean,
 	onCreate	: toBoolean,
 	onRetrieve	: toBoolean,

@@ -1,5 +1,5 @@
 // Packages
-import query from "@acai/query";
+import query, { AbstractQuery } from "@acai/query";
 import { CustomException } from "@acai/utils";
 
 // Interfaces
@@ -27,29 +27,28 @@ export default class Model {
 	// -------------------------------------------------
 
 	public constructor (fields: Record<string, unknown> = {}, databaseSaved = false) {
-		const $allFields 			= (this.constructor as unknown as {$fields: FieldInfoInterface[]}).$fields;
+		const $allFields 			= (this.constructor.prototype as {$fields: FieldInfoInterface[]}).$fields;
 		this.$databaseInitialized 	= databaseSaved;
 
 		// set fields
 		for (let i = 0; i < $allFields.length; i++) {
 			const field = $allFields[i];
 
-			this[field.name as keyof this] = Object.defineProperty(this, field.name, {
+			// define custom getter
+			Object.defineProperty(this, field.name, {
 				set: (value) => {
-					const onSet = dynamicTypes.get(field.type).onRetrieve;
-					this.$values[field.name] = onSet ? onSet(value, this.$values, field.args) : value;
+					const dynamictype 			= dynamicTypes.get(field.type);
+					const callback 				= databaseSaved ? dynamictype.onRetrieve : dynamictype.onCreate;
+					this.$values[field.name] 	= callback ? callback(value, this.$values, field.args) : value;
 				},
 				get: () => {
 					return this.$values[field.name];
 				}
 			});
-		}
 
-		// save values
-		Object.keys(fields).forEach(key => {
-			// deno-lint-ignore no-explicit-any
-			this[key as keyof this] = fields[key] as any;
-		});
+			// set value
+			this[field.name] = fields ? fields[field.name]:undefined;
+		}
 	}
 
 	// -------------------------------------------------
@@ -59,7 +58,7 @@ export default class Model {
 	public toObject () {
 		const serializedValues = {};
 
-		Model.$fields.forEach(field => {
+		this.constructor.prototype.$fields.forEach(field => {
 			const value = this.$values[field.name];
 			const onSet = dynamicTypes.get(field.type).onSerialize;
 
@@ -77,7 +76,7 @@ export default class Model {
 	// Query methods
 	// -------------------------------------------------
 
-	public static query () {
+	public static query <T extends typeof Model, I = InstanceType<T>> (this: T) {
 		return query().table(this.$table).parseResult((result: unknown) => {
 			if (Array.isArray(result)) {
 				return result.map(r => {
@@ -86,7 +85,7 @@ export default class Model {
 			}
 
 			return new this({...(result as Record<string, unknown>)}, true);
-		});
+		}) as AbstractQuery<I>	;
 	}
 
 	public static async paginate <T extends typeof Model, I = InstanceType<T>> (this: T, page = 1, perPage = 25) {
@@ -94,11 +93,11 @@ export default class Model {
 	}
 
 	public static async find <T extends typeof Model, I = InstanceType<T>> (this: T, id: string | number): Promise<I | undefined> {
-		return (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get())[0] as unknown as I | undefined;
+		return (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get<I>())[0];
 	}
 
 	public static async findOrFail <T extends typeof Model, I = InstanceType<T>> (this: T, id: string | number): Promise<I | undefined> {
-		const response = (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get())[0] as unknown as I | undefined;
+		const response = (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get<I>())[0];
 
 		if (!response) {
 			throw new CustomException("modelNotFound", `Model ${this.name} with ${this.$primary} ${id} not found`, {
@@ -112,11 +111,11 @@ export default class Model {
 	}
 
 	public static async first <T extends typeof Model, I = InstanceType<T>> (this: T): Promise<I | undefined> {
-		return this.query().first() as Promise<I | undefined>;
+		return this.query().first<I>() as Promise<I | undefined>;
 	}
 
 	public static async last <T extends typeof Model, I = InstanceType<T>> (this: T): Promise<I | undefined> {
-		return this.query().last() as Promise<I | undefined>;
+		return this.query().last<I>() as Promise<I | undefined>;
 	}
 
 	public static async runMigration () {
@@ -124,7 +123,7 @@ export default class Model {
 		const fields = {};
 
 		// map fields
-		this.$fields.forEach(field => {
+		(this.prototype as any).$fields.forEach(field => {
 			const typeObj = dynamicTypes.get(field.type).type || {type: "string"};
 
 			fields[field.name] = {
@@ -149,7 +148,7 @@ export default class Model {
 
 	public async save () {
 		const { $table, $primary } 	= this.constructor as any;
-		const { $fields } 			= this.constructor.prototype;
+		const { $fields } 			= this.constructor.prototype as any;
 
 		// get fields
 		const fields = {};
@@ -162,16 +161,19 @@ export default class Model {
 		}
 
 		// already on database, just update
+		let id;
 		if (this.$databaseInitialized) {
 			await query().table($table).where($primary, fields[$primary] as string).update(fields);
+			id = fields[$primary];
 		}
 		// not on database, create
 		else {
-			await query().table($table).where($primary, fields[$primary] as string).insert(fields);
+			id = await query().table($table).insert(fields) || fields[$primary];
+			this.$databaseInitialized = true;
 		}
 
 		// update fields
-		this.fill(await query().table($table).where($primary, fields[$primary] as string).first());
+		this.fill(await query().table($table).where($primary, id).first());
 	}
 
 	public async delete () {
@@ -186,7 +188,7 @@ export default class Model {
 	}
 
 	public fill (fields: Record<string, unknown>) {
-		const $allFields = (this.constructor as {$fields?: FieldInfoInterface[]}).$fields;
+		const $allFields = (this.constructor.prototype as {$fields?: FieldInfoInterface[]}).$fields;
 		
 		// set fields
 		for (let i = 0; i < $allFields.length; i++) {

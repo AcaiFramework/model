@@ -8,6 +8,8 @@ import dateType 	from "./date";
 import booleanType 	from "./boolean";
 import floatType 	from "./float";
 import hashType 	from "./hash";
+import sidType	 	from "./sid";
+import uuidType	 	from "./uuid";
 
 let typesList: Record<string, ModelTypeInterface> = {
 	"string"	: stringType,
@@ -16,6 +18,8 @@ let typesList: Record<string, ModelTypeInterface> = {
 	"date"		: dateType,
 	"boolean"	: booleanType,
 	"hash"		: hashType,
+	"sid"		: sidType,
+	"uuid"		: uuidType,
 };
 
 // -------------------------------------------------

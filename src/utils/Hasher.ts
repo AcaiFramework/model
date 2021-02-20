@@ -14,23 +14,23 @@ export default class Hasher {
 	// -------------------------------------------------
 
 	constructor (value?: string, saltOrRounds?: string) {
-		if (value) this.value = value;
-		this.saltOrRounds 	= saltOrRounds;
+		if (value) this.value 	= value;
+		this.saltOrRounds 		= saltOrRounds;
 	}
 
 	// -------------------------------------------------
 	// Instance methods
 	// -------------------------------------------------
 
-	public async hash (value: string) {
-		this.value = await bcrypt.hash(value, this.saltOrRounds);
+	public hash (value: string) {
+		this.value = bcrypt.hashSync(value, this.saltOrRounds || 10);
 	}
 
 	public toString () {
 		return this.value;
 	}
 
-	public async compare (valueToCompare: string) {
-		return await bcrypt.compare(valueToCompare, this.value);
+	public compare (valueToCompare: string) {
+		return bcrypt.compareSync(valueToCompare, this.value);
 	}
 }

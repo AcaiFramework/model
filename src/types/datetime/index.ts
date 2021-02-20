@@ -9,8 +9,6 @@ const toDate = (v: unknown) => {
 		return v;
 	if (typeof v === "string")
 		return DateTime.fromISO(v);
-	if (typeof v === "number")
-		return DateTime.fromMillis(v);
 	if (v instanceof Date)
 		return DateTime.fromJSDate(v);
 		
@@ -26,12 +24,12 @@ const toSerializeDate = (v: Date, _: unknown, args?: {format?: string}) => {
 		}
 	}
 		
-	return value.toISODate();
+	return value.toISO();
 };
 
-const dateType = {
+const datetimeType = {
 	type: {
-		type: "date",
+		type: "datetime",
 	},
 	onCreate	: toDate,
 	onRetrieve	: toDate,
@@ -39,4 +37,4 @@ const dateType = {
 	onSerialize	: toSerializeDate,
 } as ModelTypeInterface;
 
-export default dateType;
+export default datetimeType;

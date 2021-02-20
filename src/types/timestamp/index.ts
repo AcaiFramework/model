@@ -8,7 +8,7 @@ const toDate = (v: unknown) => {
 	if (DateTime.isDateTime(v))
 		return v;
 	if (typeof v === "string")
-		return DateTime.fromISO(v);
+		return DateTime.fromMillis(parseInt(v));
 	if (typeof v === "number")
 		return DateTime.fromMillis(v);
 	if (v instanceof Date)
@@ -17,21 +17,15 @@ const toDate = (v: unknown) => {
 	return v;
 };
 
-const toSerializeDate = (v: Date, _: unknown, args?: {format?: string}) => {
+const toSerializeDate = (v: Date, _: unknown) => {
 	const value = DateTime.isDateTime(v) ? v : DateTime.fromJSDate(v);
-
-	if (args) {
-		if (args.format) {
-			return value.toFormat(args.format);
-		}
-	}
 		
-	return value.toISODate();
+	return value.toMillis();
 };
 
-const dateType = {
+const timestampType = {
 	type: {
-		type: "date",
+		type: "timestamp",
 	},
 	onCreate	: toDate,
 	onRetrieve	: toDate,
@@ -39,4 +33,4 @@ const dateType = {
 	onSerialize	: toSerializeDate,
 } as ModelTypeInterface;
 
-export default dateType;
+export default timestampType;
