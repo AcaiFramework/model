@@ -1,12 +1,16 @@
 // Packages
 import query, { AbstractQuery } from "@acai/query";
-import { CustomException } from "@acai/utils";
+import { CustomException } 		from "@acai/utils";
 
 // Interfaces
-import FieldInfoInterface from "../interfaces/fieldInfo";
+import FieldInfoInterface 	from "../interfaces/fieldInfo";
+import RelationDataInterface 	from "../interfaces/relationData";
 
 // Types
 import * as dynamicTypes from "../types/index";
+
+// Utils
+import foreignHandler from "../utils/foreignHandler";
 
 export default class Model {
 	// -------------------------------------------------
@@ -15,11 +19,12 @@ export default class Model {
 
 	// static
 	public static $table		: string;
-	public static $primary	: string = "id";
-	protected static $fields	: FieldInfoInterface[] = [];
+	public static $primary		: string = "id";
+	public static $fields		: FieldInfoInterface[] = [];
+	public static $relations	: RelationDataInterface[] = [];
 
 	// instance
-	private $values: Record<string, unknown> = {};
+	public $values: Record<string, unknown> = {};
 	public $databaseInitialized = false;
 
 	// -------------------------------------------------
@@ -27,22 +32,35 @@ export default class Model {
 	// -------------------------------------------------
 
 	public constructor (fields: Record<string, unknown> = {}, databaseSaved = false) {
-		const $allFields 			= (this.constructor.prototype as {$fields: FieldInfoInterface[]}).$fields;
+		const modelClass			= this.constructor.prototype as {$fields: FieldInfoInterface[], $relations: RelationDataInterface[]};
+		const $allFields 			= modelClass.$fields;
 		this.$databaseInitialized 	= databaseSaved;
 
 		// set fields
 		for (let i = 0; i < $allFields.length; i++) {
-			const field = $allFields[i];
+			const field 	= $allFields[i];
+			const foreign	= modelClass.$relations.find((i) => i.name === field.name);
+			const handler 	= foreign ? foreignHandler.bind(this)(foreign) : undefined;
 
 			// define custom getter
 			Object.defineProperty(this, field.name, {
 				set: (value) => {
-					const dynamictype 			= dynamicTypes.get(field.type);
-					const callback 				= databaseSaved ? dynamictype.onRetrieve : dynamictype.onCreate;
-					this.$values[field.name] 	= callback ? callback(value, this.$values, field.args) : value;
+					// not a foreign
+					if (!foreign) {
+						const dynamictype 			= dynamicTypes.get(field.type);
+						const callback 				= databaseSaved ? dynamictype.onRetrieve : dynamictype.onCreate;
+						this.$values[field.name] 	= callback ? callback(value, this.$values, field.args) : value;
+					}
 				},
 				get: () => {
-					return this.$values[field.name];
+					// custom getter
+					if (handler) {
+						return handler;
+					}
+					// not a foreign
+					else {
+						return this.$values[field.name];
+					}
 				}
 			});
 
@@ -59,24 +77,32 @@ export default class Model {
 		const serializedValues = {};
 
 		this.constructor.prototype.$fields.forEach(field => {
-			const value = this.$values[field.name];
-			const onSet = dynamicTypes.get(field.type).onSerialize;
+			const value 	= this.$values[field.name];
+			const onSet 	= dynamicTypes.get(field.type).onSerialize;
+			const foreign	= this.constructor.prototype.$relations.find(i => i.name === field.name);
 
-			serializedValues[field.name] = onSet ? onSet(value, this.$values, field.args):value;
+			if (foreign) {
+				if (foreign.type === "belongsTo") {
+					serializedValues[foreign.foreignKey] = this.$values[foreign.foreignKey];
+				}
+			}
+			else {
+				serializedValues[field.name] = onSet ? onSet(value, this.$values, field.args):value;
+			}
 		});
 
 		return serializedValues;
 	}
 
 	public toJson () {
-		return JSON.stringify(this.$values);
+		return JSON.stringify(this.toObject());
 	}
 
 	// -------------------------------------------------
 	// Query methods
 	// -------------------------------------------------
 
-	public static query <T extends typeof Model, I = InstanceType<T>> (this: T) {
+	public static query <T extends typeof Model, I = InstanceType<T>> (this: T): AbstractQuery<T> {
 		return query().table(this.$table).parseResult((result: unknown) => {
 			if (Array.isArray(result)) {
 				return result.map(r => {
@@ -85,7 +111,7 @@ export default class Model {
 			}
 
 			return new this({...(result as Record<string, unknown>)}, true);
-		}) as AbstractQuery<I>	;
+		}) as unknown as AbstractQuery<I>;
 	}
 
 	public static async paginate <T extends typeof Model, I = InstanceType<T>> (this: T, page = 1, perPage = 25) {
@@ -93,11 +119,11 @@ export default class Model {
 	}
 
 	public static async find <T extends typeof Model, I = InstanceType<T>> (this: T, id: string | number): Promise<I | undefined> {
-		return (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get<I>())[0];
+		return (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get())[0] as I | undefined;
 	}
 
 	public static async findOrFail <T extends typeof Model, I = InstanceType<T>> (this: T, id: string | number): Promise<I | undefined> {
-		const response = (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get<I>())[0];
+		const response = (await this.query().orderBy(this.$primary).where(this.$primary, id).limit(1).get())[0] as I;
 
 		if (!response) {
 			throw new CustomException("modelNotFound", `Model ${this.name} with ${this.$primary} ${id} not found`, {
@@ -118,28 +144,46 @@ export default class Model {
 		return this.query().last<I>() as Promise<I | undefined>;
 	}
 
-	public static async runMigration () {
-		const exists = await query().existsTable(this.$table);
+	// -------------------------------------------------
+	// Migration methods
+	// -------------------------------------------------
+
+	public static addMigration () {
 		const fields = {};
 
 		// map fields
-		(this.prototype as any).$fields.forEach(field => {
+		(this.prototype as unknown as {$fields: FieldInfoInterface[]}).$fields.forEach(field => {
 			const typeObj = dynamicTypes.get(field.type).type || {type: "string"};
 
 			fields[field.name] = {
 				...typeObj,
-				primary: this.$primary === field.name
+				primary: this.$primary === field.name,
 			};
+
+			// check foreign key
+			(this.prototype as unknown as {$relations: RelationDataInterface[]}).$relations.forEach(foreign => {
+				if (foreign.type === "belongsTo" && foreign.name === field.name) {
+					const primary 		= foreign.primaryKey || foreign.model().$primary;
+					const primaryType 	= (foreign.model().prototype as any).$fields.find(i => i.name === primary);
+					const typeObj 		= dynamicTypes.get(primaryType.type).type || {type: "string"};
+
+					// unset field because we won't be using it
+					delete fields[field.name];
+
+					// add foreign key
+					fields[foreign.foreignKey] = {
+						...typeObj,
+						foreign: {
+							table	: foreign.model().$table,
+							column	: primary,
+							onDelete: "CASCADE",
+						}
+					};
+				}
+			});
 		});
 
-		// update
-		if (exists) {
-			await query().alterTable(this.$table, fields);
-		}
-		// create
-		else {
-			await query().createTable(this.$table, fields);
-		}
+		query().addMigration(this.$table, fields);
 	}
 
 	// -------------------------------------------------

@@ -14,14 +14,13 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@acai/query": "^0.3.14",
+    "@acai/query": "^0.4.1",
     "@acai/utils": "^0.1.1",
     "bcrypt": "^5.0.0",
     "luxon": "^1.26.0",
     "uuid": "^8.3.2"
   },
   "peerDependencies": {
-    "@acai/query": "*",
     "luxon": "^1.26.0"
   },
   "devDependencies": {

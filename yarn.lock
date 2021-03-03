@@ -10,10 +10,10 @@
     glob "^7.1.6"
     ts-node "^9.1.1"
 
-"@acai/query@^0.3.14":
-  version "0.3.14"
-  resolved "https://registry.yarnpkg.com/@acai/query/-/query-0.3.14.tgz#a4d70fdb7060fd038c8c117aadff276ff971fc07"
-  integrity sha512-dqzu7XYXr6x1JxvvrQkEfaWmVMc9GN9Q0QekdKQ1ayomfMd/DG/VIZwNB9v82GmuxeehejkVRhhw65p4De5czw==
+"@acai/query@^0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@acai/query/-/query-0.4.1.tgz#473a83a6a0124882aef8e0409f343fc8734764bf"
+  integrity sha512-xUf/SYnhSOTlRd924FYsCaWrSlmNF8MfVhYkQ4yLp2+/LzGLKu9TmWtXLiR+Exl6/563Fk32R9fAWxYhMtETlQ==
   dependencies:
     mysql2 "^2.2.5"
   optionalDependencies:
